@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 
 //Main page'in entry point'i
@@ -55,7 +57,7 @@ class MainPageState extends State<MainPageView> {
   }
 
 
-//Burası main page'de geri tuşuna basınca çıkmak istior musunuz diye sormak için
+//Main'de geri basınca çıkmak istiyon mu diye pop-up çıkıyo, evet dersen uygulamayı kapatıyor.
   Future<bool> _onWillPop() async {
     return await showDialog(
           context: context,
@@ -68,7 +70,7 @@ class MainPageState extends State<MainPageView> {
                 child: const Text('No'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () =>  SystemNavigator.pop(),
                 child: const Text('Yes'),
               ),
             ],
@@ -112,14 +114,15 @@ class MainPageState extends State<MainPageView> {
 
                       //aşağıdaki base64 gönderilcek
                       String base64Image = base64Encode(imageBytes);
+                      sendImage(base64Image);
 
-                      await Navigator.of(context).push(
+                      /*await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => DisplayBase64(
                             base64Image: base64Image,
                           ),
                         ),
-                      );
+                      );*/
                     } catch (e) {
                       print(e);
                     }
@@ -136,6 +139,8 @@ class MainPageState extends State<MainPageView> {
 }
 
 
+
+
 //Başka bir sayfada base64'e çevrilen foto gözüküyor
 class DisplayBase64 extends StatelessWidget {
   final String base64Image;
@@ -149,6 +154,29 @@ class DisplayBase64 extends StatelessWidget {
         child: Text(base64Image),
       ),
     );
-  }
-  
+  }  
 }
+Future<void> sendImage(String base64Image) async {
+  Uri uri = Uri.parse('http://192.168.1.41:8000/getImage');
+  try {
+    http.Response response = await http.post(
+      uri,
+      body: jsonEncode(<String, String>{'image': base64Image}),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      print('Image uploaded successfully');
+      // Handle the response from the server here
+    } else {
+      print('Failed to upload image. Status code: ${response.statusCode}');
+      // Handle the error here
+    }
+  } catch (e) {
+    print('Failed to upload image: $e');
+    // Handle the error here
+  }
+}
+
+
+

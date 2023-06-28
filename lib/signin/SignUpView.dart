@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+Uri uri = Uri.parse('https://192.168.1.37:3000/api');
 
 class SignUpView extends StatefulWidget{
   @override
@@ -13,6 +16,10 @@ class _SignUpViewState extends State<SignUpView>{
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  late String email;
+  late String username;
+  late String password;
+
   //Widget build metodu sayfanın elemanlarını içeriyor.
   //Scaffold bir iskelet.Appbar başlık, body sayfanın geri kalanı.Tek bir body
   //objesi var, diğerleri child oluyor.Eğer birden fazla widget kullanılacaksa 
@@ -22,8 +29,8 @@ class _SignUpViewState extends State<SignUpView>{
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Center(
-          child: const Text('Sign Up'), 
+        title: const Center(
+          child:  Text('Sign Up'), 
         ),
       ),
       body: Center(
@@ -107,13 +114,11 @@ class _SignUpViewState extends State<SignUpView>{
                   padding: const EdgeInsets.all(16.0),
                   child:ElevatedButton(
                   onPressed:() {
-                    //Başarılı sign up'dan sonra main page'e ineriz.
-                    if(_emailController.text.isNotEmpty && 
-                    _passwordController.text.isNotEmpty && _usernameController.text.isNotEmpty) {
-                        Navigator.pop(context);
+                    if(_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty && _usernameController.text.isNotEmpty){
+                        sendPostRequest();
                     }
-
-                  },
+                    
+                    },                  
                   child: const Text("Submit"),
                  ),
                 ),               
@@ -133,4 +138,36 @@ class _SignUpViewState extends State<SignUpView>{
     _usernameController.dispose();
     _passwordController.dispose();
   }
+  
+//Kullanıcı adı şifre postlanması, DENENMEDİ
+Future<void> sendPostRequest() async {
+  String jsonString = '{"name": "$username", "email": "$email", "password: "$password"}';
+
+  try {
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonString,
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pop(context);
+      // Request successful
+      print('POST request successful');
+      print('Response body: ${response.body}');
+    } else {
+      // Request failed
+      print('POST request failed');
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  } catch (e) {
+    // Request error
+    print('Error during POST request: $e');
+  }
 }
+}
+
+

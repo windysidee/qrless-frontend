@@ -9,16 +9,19 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  late String _username;
+  late String _password;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Center(
-          child: const Text('QRless')),
+        title: const Center(
+          child: Text('QRless')),
       ),
       body: Center(
         child: Padding(
@@ -29,7 +32,7 @@ class _LoginViewState extends State<LoginView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextFormField(
-                  controller: _emailController,
+                  controller: _usernameController,
                   decoration: const InputDecoration(
                     icon: Icon(Icons.person),
                     hintText: 'Enter your username',
@@ -59,9 +62,12 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 ElevatedButton(
                   onPressed: (){
+                    //Gelen response 200'se main page'e gönder yoksa error.
                     Navigator.pushNamed(context,'/MainPage');
-                  },
-                   child: Text('Submit'),
+                    _username = _usernameController.text;
+                    _password = _passwordController.text;
+                  }, 
+                   child: const Text('Submit'),
                   ),
                 TextButton(                 
                   onPressed: (){
@@ -72,10 +78,8 @@ class _LoginViewState extends State<LoginView> {
                     "Sign Up",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                    ),
-
-                            
-                  ),                 
+                    ),          
+                  ), 
                 ),
               ],
             ),
@@ -89,10 +93,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   void dispose(){
     super.dispose();
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
-
-
-
   }
 }
