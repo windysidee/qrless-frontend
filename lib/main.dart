@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_qrless/login/LoginView.dart';  
+import 'package:flutter_qrless/login/LoginView.dart';
 import 'package:flutter_qrless/signin/SignUpView.dart';
 import 'package:flutter_qrless/main/MainPageView.dart';
 
@@ -28,8 +28,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => LoginView(),
         '/SignIn': (context) => SignUpView(),
-        '/MainPage': (context) => MainPageView(camera: firstCamera),
-      }, 
+      },
     );
   }
 }

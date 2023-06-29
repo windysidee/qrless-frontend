@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
@@ -10,9 +9,7 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
-  //Key'e çok takılma nolduğunu ben de anlamadım
   final _formKey = GlobalKey<FormState>();
-  //Input handling, fazla bilgi için üstüne gel oku
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -21,18 +18,15 @@ class _SignUpViewState extends State<SignUpView> {
   late String username;
   late String password;
 
-  //Widget build metodu sayfanın elemanlarını içeriyor.
-  //Scaffold bir iskelet.Appbar başlık, body sayfanın geri kalanı.Tek bir body
-  //objesi var, diğerleri child oluyor.Eğer birden fazla widget kullanılacaksa
-  //children : <Obje Türü> [buraya da çocuklar].
   @override
   Widget build(BuildContext context) {
     Shader textGradient = LinearGradient(
       colors: <Color>[
         Color.fromARGB(255, 255, 255, 255),
-        Color.fromARGB(255, 72, 72, 255)
+        Color.fromARGB(255, 72, 72, 255),
       ],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+
     return Scaffold(
       backgroundColor: Color(0xFFACCBFF),
       appBar: AppBar(
@@ -77,9 +71,7 @@ class _SignUpViewState extends State<SignUpView> {
                     height: 1.5,
                   ),
                 ),
-
                 SizedBox(height: 50.0),
-
                 Container(
                   decoration: BoxDecoration(
                     color: Color(0xFFDBEDFF),
@@ -101,9 +93,7 @@ class _SignUpViewState extends State<SignUpView> {
                     },
                   ),
                 ),
-
                 SizedBox(height: 10.0),
-
                 Container(
                   decoration: BoxDecoration(
                     color: Color(0xFFDBEDFF),
@@ -125,9 +115,7 @@ class _SignUpViewState extends State<SignUpView> {
                     },
                   ),
                 ),
-
                 SizedBox(height: 10.0),
-
                 Container(
                   decoration: BoxDecoration(
                     color: Color(0xFFDBEDFF),
@@ -150,16 +138,13 @@ class _SignUpViewState extends State<SignUpView> {
                     obscureText: true,
                   ),
                 ),
-
                 SizedBox(height: 10.0),
-
                 Container(
                   decoration: BoxDecoration(
                     color: Color(0xFFDBEDFF),
                     borderRadius: BorderRadius.circular(30.0),
                   ),
                   child: TextFormField(
-                    controller: _passwordController,
                     decoration: const InputDecoration(
                       icon: Icon(Icons.lock),
                       hintText: 'Please enter your password again',
@@ -175,24 +160,20 @@ class _SignUpViewState extends State<SignUpView> {
                     obscureText: true,
                   ),
                 ),
-
-                //Submit butonu ayarlamaç
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_emailController.text.isNotEmpty &&
-                          _passwordController.text.isNotEmpty &&
-                          _usernameController.text.isNotEmpty) {
-                          handleRegister();
+                      if (_formKey.currentState!.validate()) {
+                        handleRegister();
                       }
                     },
-                    child:  Text(
+                    child: Text(
                       'Submit',
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 22.0,
-                        fontWeight: FontWeight.w800, // Extra bold
+                        fontWeight: FontWeight.w800,
                         fontStyle: FontStyle.normal,
                         fontFamily: 'Inter',
                         shadows: [
@@ -205,10 +186,9 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF3B5998), // Background color
+                      primary: Color(0xFF3B5998),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(30.0), // Border radius
+                        borderRadius: BorderRadius.circular(30.0),
                       ),
                       minimumSize: Size(387, 55),
                     ),
@@ -222,7 +202,6 @@ class _SignUpViewState extends State<SignUpView> {
     );
   }
 
-  //Controller'ları dispose etmek gerekiyor.Garbage collector yok galiba.
   @override
   void dispose() {
     super.dispose();
@@ -231,48 +210,91 @@ class _SignUpViewState extends State<SignUpView> {
     _passwordController.dispose();
   }
 
-//Kullanıcı adı şifre postlanması, çalışıyo 
-  Future<void> handleRegister() async {
-    Uri uri = Uri.parse('http://192.168.1.37:8000/users/register');
-    try {
-      final response = await http.post(uri,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            'username': '$username',
-            'password': '$password',
-          }));
+  void handleRegister() {
+    // Simulate registration success
+    Future.delayed(Duration(seconds: 1), () {
+      // Clear the form fields
+      _emailController.clear();
+      _usernameController.clear();
+      _passwordController.clear();
 
-      if (response.statusCode == 200) {
-        //200 dönderirse success, dialog gösterilir navigation.
-        showSuccessDialog();
-        Navigator.pop(context);
+      // Show success dialog
+      showSuccessDialog();
 
-      } else {      
-        print('Response status code: ${response.statusCode}');        
-      }
-    } catch (e) {
-      print("Exception'a girdi: $e");
-    }
+      // Navigate back to LoginView after a delay
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/',
+          (Route<dynamic> route) => false,
+        );
+      });
+    });
   }
-  //Bu fena çalışmıyo, otomatik logine yönlendirmeç, geri tuşuna basarak çık en kötü
-  void showSuccessDialog ()  {
-   showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        content: const Text('Your account has been created successfully!'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
+
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //BURASINI SİLMEDİM BACKENDDEN GERÇEK VERİ GELİNCE BURASI KULLANILIR BELKİ DİYE EMİN DEĞİLİM!
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  // Future<void> handleRegister() async {
+  //   email = _emailController.text;
+  //   username = _usernameController.text;
+  //   password = _passwordController.text;
+
+  //   Uri uri = Uri.parse('http://192.168.1.37:8000/users/register');
+  //   try {
+  //     final response = await http.post(
+  //       uri,
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //       },
+  //       body: jsonEncode(<String, String>{
+  //         'username': username,
+  //         'password': password,
+  //       }),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       showSuccessDialog();
+  //       _emailController.clear();
+  //       _usernameController.clear();
+  //       _passwordController.clear();
+  //     } else {
+  //       print('Response status code: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print("Exception occurred: $e");
+  //   }
+  // }
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Container(
+            color: Colors.green,
+            padding: EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
+            child: Text(
+              'Registration Successful!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 40.0,
+              ),
+            ),
           ),
-        ],
-      );
-    },
-  );
-}
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

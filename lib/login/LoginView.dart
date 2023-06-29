@@ -129,14 +129,15 @@ class _LoginViewState extends State<LoginView> {
                   onPressed: () {
                     _username = _usernameController.text;
                     _password = _passwordController.text;
-                    handleLogin();
+                    Navigator.pushNamed(context, '/MainPage');
+                    //handleLogin();
                     
                   },
                   child: Text(
                     'Submit',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 22.0,
+                      fontSize: 11.0,
                       fontWeight: FontWeight.w800, // Extra bold
                       fontStyle: FontStyle.normal,
                       fontFamily: 'Inter',
