@@ -1,8 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
-
-Uri uri = Uri.parse('https://192.168.1.37:3000/api');
 
 class SignUpView extends StatefulWidget {
   @override
@@ -184,12 +184,12 @@ class _SignUpViewState extends State<SignUpView> {
                       if (_emailController.text.isNotEmpty &&
                           _passwordController.text.isNotEmpty &&
                           _usernameController.text.isNotEmpty) {
-                        sendPostRequest();
+                          handleRegister();
                       }
                     },
-                    child: Text(
+                    child:  Text(
                       'Submit',
-                      style: TextStyle(
+                      style:  TextStyle(
                         color: Colors.white,
                         fontSize: 22.0,
                         fontWeight: FontWeight.w800, // Extra bold
@@ -231,34 +231,48 @@ class _SignUpViewState extends State<SignUpView> {
     _passwordController.dispose();
   }
 
-//Kullanıcı adı şifre postlanması, DENENMEDİ
-  Future<void> sendPostRequest() async {
-    String jsonString =
-        '{"name": "$username", "email": "$email", "password: "$password"}';
-
+//Kullanıcı adı şifre postlanması, çalışıyo 
+  Future<void> handleRegister() async {
+    Uri uri = Uri.parse('http://192.168.1.37:8000/users/register');
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonString,
-      );
+      final response = await http.post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'username': '$username',
+            'password': '$password',
+          }));
 
       if (response.statusCode == 200) {
+        //200 dönderirse success, dialog gösterilir navigation.
+        showSuccessDialog();
         Navigator.pop(context);
-        // Request successful
-        print('POST request successful');
-        print('Response body: ${response.body}');
-      } else {
-        // Request failed
-        print('POST request failed');
-        print('Response status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
+
+      } else {      
+        print('Response status code: ${response.statusCode}');        
       }
     } catch (e) {
-      // Request error
-      print('Error during POST request: $e');
+      print("Exception'a girdi: $e");
     }
   }
+  //Bu fena çalışmıyo, otomatik logine yönlendirmeç, geri tuşuna basarak çık en kötü
+  void showSuccessDialog ()  {
+   showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: const Text('Your account has been created successfully!'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
 }

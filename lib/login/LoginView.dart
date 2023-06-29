@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_qrless/signin/SignUpView.dart';
+import 'package:flutter_qrless/main/MainPageView.dart';
+import 'package:http/http.dart' as http;
 import 'dart:ui';
 
 class LoginView extends StatefulWidget {
@@ -12,12 +17,12 @@ class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _username = "";
-  String _password = "";
+  late String _username;
+  late String _password;
 
   @override
   Widget build(BuildContext context) {
-    Shader textGradient = LinearGradient(
+    Shader textGradient = const LinearGradient(
       colors: <Color>[
         Color.fromARGB(255, 255, 255, 255),
         Color.fromARGB(255, 72, 72, 255)
@@ -122,9 +127,10 @@ class _LoginViewState extends State<LoginView> {
 
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/MainPage');
                     _username = _usernameController.text;
                     _password = _passwordController.text;
+                    handleLogin();
+                    
                   },
                   child: Text(
                     'Submit',
@@ -170,5 +176,33 @@ class _LoginViewState extends State<LoginView> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+  }
+
+  Future<void> handleLogin() async {
+    Uri uri = Uri.parse('http://192.168.1.37:8000/users/login');
+    try {
+      final response = await http.post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'username': '$_username',
+            'password': '$_password',
+          }));
+
+      if (response.statusCode == 200) {
+        Navigator.pushNamed(context, '/MainPage');
+      } else {
+        print('Response status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Exception'a girdi: $e");
+    }
   }
 }
