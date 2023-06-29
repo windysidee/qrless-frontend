@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_qrless/signin/SignUpView.dart';
-import 'package:flutter_qrless/main/MainPageView.dart';
+import 'dart:ui';
 
 class LoginView extends StatefulWidget {
+  LoginView({Key? key}) : super(key: key);
+
   @override
   _LoginViewState createState() => _LoginViewState();
 }
@@ -11,17 +12,42 @@ class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  late String _username;
-  late String _password;
+  String _username = "";
+  String _password = "";
 
   @override
   Widget build(BuildContext context) {
+    Shader textGradient = LinearGradient(
+      colors: <Color>[
+        Color.fromARGB(255, 255, 255, 255),
+        Color.fromARGB(255, 72, 72, 255)
+      ],
+    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
     return Scaffold(
+      backgroundColor: Color(0xFFACCBFF),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Center(
-          child: Text('QRless')),
+        title: Center(
+          child: Text(
+            'QRless',
+            style: TextStyle(
+              fontSize: 60.0,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.25),
+                  offset: Offset(0, 4),
+                  blurRadius: 2,
+                ),
+              ],
+              fontFamily: 'Bruno Ace SC',
+              fontStyle: FontStyle.normal,
+              fontWeight: FontWeight.w400,
+              foreground: Paint()..shader = textGradient,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Center(
         child: Padding(
@@ -31,69 +57,118 @@ class _LoginViewState extends State<LoginView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.person),
-                    hintText: 'Enter your username',
-                    labelText: 'Username',
+                SizedBox(height: 70.0), // Spacing
+                const Text(
+                  'Login',
+                  style: TextStyle(
+                    color: Color(0xFFF4FAFF),
+                    fontSize: 40.0,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w800,
+                    height: 1.5,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
                 ),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.lock),
-                    hintText: 'Enter your password',
-                    labelText: 'Password',
+
+                SizedBox(height: 30.0),
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFFDBEDFF),
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
-                  obscureText: true,
+                  child: TextFormField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.person),
+                      hintText: 'Enter your username',
+                      labelText: 'Username',
+                      border: InputBorder.none,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your username';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
+
+                SizedBox(height: 20.0),
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFFDBEDFF),
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  child: TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.lock),
+                      hintText: 'Enter your password',
+                      labelText: 'Password',
+                      border: InputBorder.none,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                    obscureText: true,
+                  ),
+                ),
+
+                SizedBox(height: 30.0),
+
                 ElevatedButton(
-                  onPressed: (){
-                    //Gelen response 200'se main page'e gönder yoksa error.
-                    Navigator.pushNamed(context,'/MainPage');
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/MainPage');
                     _username = _usernameController.text;
                     _password = _passwordController.text;
-                  }, 
-                   child: const Text('Submit'),
-                  ),
-                TextButton(                 
-                  onPressed: (){
-                    Navigator.pushNamed(context, '/SignIn');
-                    
-                  },  
-                  child: const Text(
-                    "Sign Up",
+                  },
+                  child: Text(
+                    'Submit',
                     style: TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),          
-                  ), 
+                      color: Colors.white,
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w800, // Extra bold
+                      fontStyle: FontStyle.normal,
+                      fontFamily: 'Inter',
+                      shadows: [
+                        Shadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.25),
+                          offset: Offset(0, 4),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF3B5998), // Background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(30.0), // Border radius
+                    ),
+                    minimumSize: Size(387, 55),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/SignIn');
+                  },
+                  child: const Text('Sign Up'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF3B5998),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ),
       ),
-    );   
-  }
-
-  //Controller yazacaksan dispose et, imha et.
-  @override
-  void dispose(){
-    super.dispose();
-    _usernameController.dispose();
-    _passwordController.dispose();
+    );
   }
 }
