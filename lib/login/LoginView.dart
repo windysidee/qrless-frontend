@@ -98,7 +98,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                 ),
 
-                SizedBox(height: 20.0),
+                SizedBox(height: 15.0),
 
                 Container(
                   decoration: BoxDecoration(
@@ -123,7 +123,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                 ),
 
-                SizedBox(height: 30.0),
+                SizedBox(height: 50.0),
 
                 ElevatedButton(
                   onPressed: () {
@@ -131,13 +131,12 @@ class _LoginViewState extends State<LoginView> {
                     _password = _passwordController.text;
                     Navigator.pushNamed(context, '/MainPage');
                     //handleLogin();
-                    
                   },
                   child: Text(
                     'Submit',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 11.0,
+                      fontSize: 22.0,
                       fontWeight: FontWeight.w800, // Extra bold
                       fontStyle: FontStyle.normal,
                       fontFamily: 'Inter',
@@ -156,19 +155,40 @@ class _LoginViewState extends State<LoginView> {
                       borderRadius:
                           BorderRadius.circular(30.0), // Border radius
                     ),
-                    minimumSize: Size(387, 55),
+                    minimumSize: Size(250, 55),
                   ),
                 ),
+
+                SizedBox(height: 15.0),
+
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/SignIn');
                   },
-                  child: const Text('Sign Up'),
-                  style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF3B5998),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w800, // Extra bold
+                      fontStyle: FontStyle.normal,
+                      fontFamily: 'Inter',
+                      shadows: [
+                        Shadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.25),
+                          offset: Offset(0, 4),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF3B5998), // Background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(30.0), // Border radius
+                    ),
+                    minimumSize: Size(250, 55),
                   ),
                 ),
               ],
@@ -178,6 +198,7 @@ class _LoginViewState extends State<LoginView> {
       ),
     );
   }
+
   @override
   void dispose() {
     super.dispose();

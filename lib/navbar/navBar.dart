@@ -52,7 +52,7 @@ class navBar extends StatelessWidget {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => contactUs()),
+                MaterialPageRoute(builder: (context) => ContactUs()),
               );
             },
           ),
