@@ -24,15 +24,15 @@ class navBar extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading:const Icon(Icons.favorite),
-            title:const Text('Favorites'),
+            leading: const Icon(Icons.favorite),
+            title: const Text('Favorites'),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => favorites()),
               );
-            },           
+            },
           ),
           ListTile(
             leading: const Icon(Icons.history),
@@ -59,8 +59,30 @@ class navBar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Exit'),
-            onTap: () {
-              SystemNavigator.pop();
+            onTap: () async {
+              Navigator.of(context).pop();
+              bool? shouldExit = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Are you sure?'),
+                  content: const Text('Do you want to exit?'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('No'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text('Yes'),
+                    ),
+                  ],
+                ),
+              );
+              if (shouldExit == true) {
+                SystemNavigator.pop();
+              }
             },
           ),
         ],

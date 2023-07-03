@@ -138,7 +138,7 @@ class _LoginViewState extends State<LoginView> {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 11.0,
-                      fontWeight: FontWeight.w800, 
+                      fontWeight: FontWeight.w800, // Extra bold
                       fontStyle: FontStyle.normal,
                       fontFamily: 'Inter',
                       shadows: [
@@ -151,10 +151,10 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF3B5998),
+                    primary: Color(0xFF3B5998), // Background color
                     shape: RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.circular(30.0), 
+                          BorderRadius.circular(30.0), // Border radius
                     ),
                     minimumSize: Size(387, 55),
                   ),
