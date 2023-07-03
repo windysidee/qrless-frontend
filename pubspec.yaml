@@ -33,6 +33,7 @@ dependencies:
 
   url_launcher: ^6.0.12 # check for the latest version
   top_snackbar_flutter: ^1.0.2
+  vibration: ^1.7.3
 
     
 

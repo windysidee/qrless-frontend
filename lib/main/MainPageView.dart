@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_qrless/navbar/navBar.dart';
+import 'package:vibration/vibration.dart';
 
 // Main page's entry point
 Future<void> main() async {
@@ -78,7 +79,7 @@ class MainPageState extends State<MainPageView> {
         false;
   }
 
-  // Fotoyu backend'e göndermeç. Denendi 
+  // Fotoyu backend'e göndermeç. Denendi
   Future<void> sendImage(String base64Image) async {
     Uri uri = Uri.parse('http://192.168.1.41:8000/getImage');
     try {
@@ -128,23 +129,40 @@ class MainPageState extends State<MainPageView> {
               child: Center(
                 child: FloatingActionButton(
                   onPressed: () async {
-                    try {
-                      await _initializeControllerFuture;
+  try {
+    await _initializeControllerFuture;
 
-                      final image = await _controller.takePicture();
+    final image = await _controller.takePicture();
 
-                      if (!mounted) return;
+    if (!mounted) return;
 
-                      Uint8List imageBytes = await File(image.path).readAsBytes();
+    Uint8List imageBytes = await File(image.path).readAsBytes();
 
-                      // Base64 encoded image
-                      String base64Image = base64Encode(imageBytes);
+    // Base64 encoded image
+    String base64Image = base64Encode(imageBytes);
 
-                      sendImage(base64Image);
-                    } catch (e) {
-                      print(e);
-                    }
-                  },
+    sendImage(base64Image);
+
+    // Vibrate the device for 1 second
+    Vibration.vibrate(duration: 1000);
+
+    // Create an overlay entry
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Container(
+        color: Colors.white.withOpacity(0.3),
+      ),
+    );
+
+    // Insert the overlay entry to the current context
+    Overlay.of(context)!.insert(overlayEntry);
+
+    // Remove the overlay entry after 1 second
+    Future.delayed(Duration(seconds: 1), () => overlayEntry.remove());
+  } catch (e) {
+    print(e);
+  }
+},
+
                   child: const Icon(Icons.camera_alt),
                 ),
               ),
