@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class SignUpView extends StatefulWidget {
   @override
@@ -273,17 +275,17 @@ class _SignUpViewState extends State<SignUpView> {
         return AlertDialog(
           content: Container(
             color: Colors.green,
-            padding: EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
+            padding: EdgeInsets.all(16.0),
             child: Text(
               'Registration Successful!',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 40.0,
+                fontSize: 20.0,
               ),
             ),
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           actions: <Widget>[
             TextButton(
