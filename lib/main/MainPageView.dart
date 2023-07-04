@@ -129,39 +129,77 @@ class MainPageState extends State<MainPageView> {
               child: Center(
                 child: FloatingActionButton(
                   onPressed: () async {
-  try {
-    await _initializeControllerFuture;
+                    try {
+                      await _initializeControllerFuture;
 
-    final image = await _controller.takePicture();
+                      final image = await _controller.takePicture();
 
-    if (!mounted) return;
+                      if (!mounted) return;
 
-    Uint8List imageBytes = await File(image.path).readAsBytes();
+                      Uint8List imageBytes =
+                          await File(image.path).readAsBytes();
 
-    // Base64 encoded image
-    String base64Image = base64Encode(imageBytes);
+                      // Base64 encoded image
+                      String base64Image = base64Encode(imageBytes);
 
-    sendImage(base64Image);
+                      sendImage(base64Image);
 
-    // Vibrate the device for 1 second
-    Vibration.vibrate(duration: 1000);
+                      // Vibrate for a short time
+                      HapticFeedback.lightImpact();
 
-    // Create an overlay entry
-    OverlayEntry overlayEntry = OverlayEntry(
-      builder: (context) => Container(
-        color: Colors.white.withOpacity(0.3),
-      ),
-    );
+                      // Create an overlay entry
+                      OverlayEntry overlayEntry = OverlayEntry(
+                        builder: (context) => Container(
+                          color: const Color.fromARGB(255, 186, 179, 179).withOpacity(0.4),
+                        ),
+                      );
 
-    // Insert the overlay entry to the current context
-    Overlay.of(context)!.insert(overlayEntry);
+                      // Insert the overlay entry to the current context
+                      Overlay.of(context)!.insert(overlayEntry);
 
-    // Remove the overlay entry after 1 second
-    Future.delayed(Duration(seconds: 1), () => overlayEntry.remove());
-  } catch (e) {
-    print(e);
-  }
-},
+                      // Remove the overlay entry after 1 second
+                      Future.delayed(
+                          Duration(seconds: 1), () => overlayEntry.remove());
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
+
+//BURASI HEM TİTREŞİMLİ HEM DE EKRAN BLURLU KOD/////////////////////////////////////////////////////////////////////////////////////
+//                   onPressed: () async {
+//   try {
+//     await _initializeControllerFuture;
+
+//     final image = await _controller.takePicture();
+
+//     if (!mounted) return;
+
+//     Uint8List imageBytes = await File(image.path).readAsBytes();
+
+//     // Base64 encoded image
+//     String base64Image = base64Encode(imageBytes);
+
+//     sendImage(base64Image);
+
+//     // Vibrate the device for 1 second
+//     Vibration.vibrate(duration: 1000);
+
+//     // Create an overlay entry
+//     OverlayEntry overlayEntry = OverlayEntry(
+//       builder: (context) => Container(
+//         color: Colors.white.withOpacity(0.3),
+//       ),
+//     );
+
+//     // Insert the overlay entry to the current context
+//     Overlay.of(context)!.insert(overlayEntry);
+
+//     // Remove the overlay entry after 1 second
+//     Future.delayed(Duration(seconds: 1), () => overlayEntry.remove());
+//   } catch (e) {
+//     print(e);
+//   }
+// },
 
                   child: const Icon(Icons.camera_alt),
                 ),
