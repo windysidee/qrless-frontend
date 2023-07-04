@@ -79,8 +79,9 @@ class MainPageState extends State<MainPageView> {
         false;
   }
 
-  // Fotoyu backend'e göndermeç. Denendi
+  // Fotoyu backend'e göndermeç.
   Future<void> sendImage(String base64Image) async {
+    //Url değişebilir
     Uri uri = Uri.parse('http://192.168.1.41:8000/getImage');
     try {
       http.Response response = await http.post(
@@ -90,12 +91,28 @@ class MainPageState extends State<MainPageView> {
       );
 
       if (response.statusCode == 200) {
+        //Buraya da pop up ya da bekleniyor işareti
         print('Image uploaded successfully');
       } else {
+        //Buna net pop-up
         print('Failed to upload image. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      //Buna da net pop-up
       print('Failed to upload image: $e');
+    }
+  }
+
+  //Endpoint'te menü var, assets klasöründeki burgerKing.json gibi varsaydım bütün ko
+  //kodlar ona göre yazılı.
+  Future<Map<String, dynamic>> getMenu() async {
+    Uri uri = Uri.parse('http://192.168.1.41:8000/azure/detect-brand');
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load JSON from the endpoint');
     }
   }
 
@@ -150,7 +167,8 @@ class MainPageState extends State<MainPageView> {
                       // Create an overlay entry
                       OverlayEntry overlayEntry = OverlayEntry(
                         builder: (context) => Container(
-                          color: const Color.fromARGB(255, 186, 179, 179).withOpacity(0.4),
+                          color: const Color.fromARGB(255, 186, 179, 179)
+                              .withOpacity(0.4),
                         ),
                       );
 

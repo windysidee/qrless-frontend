@@ -42,6 +42,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   camera: ^0.10.5
   http: ^1.1.0
+  collection: ^1.17.1
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +60,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+      - assets/scanHistory.json
+      - assets/favorites.json
+      - assets/burgerKing.json
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
