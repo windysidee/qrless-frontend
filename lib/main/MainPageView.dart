@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_qrless/navbar/navBar.dart';
 import 'package:vibration/vibration.dart';
+import 'package:flutter_qrless/main/MenuPage.dart';
 
 // Main page's entry point
 Future<void> main() async {
@@ -40,6 +41,7 @@ class MainPageView extends StatefulWidget {
 class MainPageState extends State<MainPageView> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -105,12 +107,16 @@ class MainPageState extends State<MainPageView> {
 
   //Endpoint'te menü var, assets klasöründeki burgerKing.json gibi varsaydım bütün ko
   //kodlar ona göre yazılı.
-  Future<Map<String, dynamic>> getMenu() async {
+   Future<void> getMenu() async {
     Uri uri = Uri.parse('http://192.168.1.41:8000/azure/detect-brand');
     final response = await http.get(uri);
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      Map<String, dynamic> menuData = jsonDecode(response.body);
+      Navigator.push(
+        _scaffoldKey.currentContext!,
+        MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
+      );
     } else {
       throw Exception('Failed to load JSON from the endpoint');
     }
@@ -121,6 +127,7 @@ class MainPageState extends State<MainPageView> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
+        key:_scaffoldKey,
         appBar: AppBar(
           title: const Center(
             child: Text('QRless'),
@@ -159,8 +166,10 @@ class MainPageState extends State<MainPageView> {
                       // Base64 encoded image
                       String base64Image = base64Encode(imageBytes);
 
-                      sendImage(base64Image);
-
+                      await sendImage(base64Image);
+                      //alttaki iki satır eklendi
+                      if (!mounted) return;
+                      await getMenu();
                       // Vibrate for a short time
                       HapticFeedback.lightImpact();
 
@@ -176,8 +185,11 @@ class MainPageState extends State<MainPageView> {
                       Overlay.of(context)!.insert(overlayEntry);
 
                       // Remove the overlay entry after 1 second
-                      Future.delayed(
-                          Duration(seconds: 1), () => overlayEntry.remove());
+                      Fuif(mounted) {
+                        Overlay.of(context)!.insert(overlayEntry);
+                        Future.delayed(
+                            Duration(seconds: 1), () => overlayEntry.remove());
+                      }
                     } catch (e) {
                       print(e);
                     }
