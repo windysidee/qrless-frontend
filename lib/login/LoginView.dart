@@ -5,6 +5,7 @@ import 'package:flutter_qrless/signin/SignUpView.dart';
 import 'package:flutter_qrless/main/MainPageView.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   LoginView({Key? key}) : super(key: key);
@@ -219,12 +220,22 @@ class _LoginViewState extends State<LoginView> {
           }));
 
       if (response.statusCode == 200) {
+        
+        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        String? token = jsonResponse['access_token'];
+        if (token != null) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
+        } else {
+          print('Token was not found in the response body.');
+        }
+
         Navigator.pushNamed(context, '/MainPage');
       } else {
         print('Response status code: ${response.statusCode}');
       }
     } catch (e) {
-      print("Exception'a girdi: $e");
+      print("Exception occurred: $e");
     }
   }
 }

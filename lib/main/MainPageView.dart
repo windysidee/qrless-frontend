@@ -9,6 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_qrless/navbar/navBar.dart';
 import 'package:vibration/vibration.dart';
 import 'package:flutter_qrless/main/MenuPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 // Main page's entry point
 Future<void> main() async {
@@ -83,27 +85,39 @@ class MainPageState extends State<MainPageView> {
 
   // Fotoyu backend'e göndermeç.
   Future<void> sendImage(String base64Image) async {
-    //Url değişebilir
-    Uri uri = Uri.parse('http://192.168.1.41:8000/getImage');
-    try {
-      http.Response response = await http.post(
-        uri,
-        body: jsonEncode(<String, String>{'image': base64Image}),
-        headers: {"Content-Type": "application/json"},
-      );
+  // Retrieve token from shared preferences
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('token');
 
-      if (response.statusCode == 200) {
-        //Buraya da pop up ya da bekleniyor işareti
-        print('Image uploaded successfully');
-      } else {
-        //Buna net pop-up
-        print('Failed to upload image. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      //Buna da net pop-up
-      print('Failed to upload image: $e');
-    }
+  if (token == null) {
+    print('Token is null, please authenticate again');
+    return;
   }
+
+  // Your URL may change
+  Uri uri = Uri.parse('http://192.168.1.41:8000/getImage');
+  
+  try {
+    http.Response response = await http.post(
+      uri,
+      body: jsonEncode(<String, String>{'image': base64Image}),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('Image uploaded successfully');
+    } else {
+      // pop-up eklenebilir
+      print('Failed to upload image. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    // opo-up eklenebilir
+    print('Failed to upload image: $e');
+  }
+}
 
   //Endpoint'te menü var, assets klasöründeki burgerKing.json gibi varsaydım bütün ko
   //kodlar ona göre yazılı.
