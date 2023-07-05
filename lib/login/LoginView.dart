@@ -208,7 +208,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> handleLogin() async {
-    Uri uri = Uri.parse('http://192.168.1.129:8000/users/login');
+    Uri uri = Uri.parse('http://192.168.170.234:8000/users/login');
     try {
       final response = await http.post(uri,
           headers: <String, String>{

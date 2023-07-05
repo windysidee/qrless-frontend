@@ -26,7 +26,7 @@ class _SearchHistoryState extends State<searchHistory> {
   //favorileri alma
   Future<List<dynamic>> getFavorite() async {
     //url değişir
-    var url = Uri.parse('https://192.168.1.129/scanhistory');
+    var url = Uri.parse('https://192.168.170.234/scanhistory');
     var response = await http.get(url);
     if (response.statusCode == 200) {
       var jsonData = jsonDecode(response.body);
@@ -40,7 +40,7 @@ class _SearchHistoryState extends State<searchHistory> {
   Future<void> handleFavorite(int index, String brandName) async {
     var url;
     if (favorited[index]) {
-      url = Uri.parse('https://192.168.1.129/favorites/$brandName');
+      url = Uri.parse('https://192.168.170.234/favorites/$brandName');
       //kalbe basıp favorileme POST
       var response = await http.post(url);
       if (response.statusCode == 200) {
@@ -51,7 +51,7 @@ class _SearchHistoryState extends State<searchHistory> {
       }
     } else {
       //kalbe basıp favoriden kaldırma DELETE
-      url = Uri.parse('https://192.168.1.129/favorites/$brandName');
+      url = Uri.parse('https://192.168.170.234/favorites/$brandName');
       var response = await http.delete(url);
       if (response.statusCode == 200) {
         print('Brand removed from favorites');

@@ -95,7 +95,7 @@ class MainPageState extends State<MainPageView> {
   }
 
   // Your URL may change
-  Uri uri = Uri.parse('http://192.168.1.41:8000/getImage');
+  Uri uri = Uri.parse('http://192.168.170.234:8000/azure/detect-brand');
   
   try {
     http.Response response = await http.post(
@@ -108,7 +108,12 @@ class MainPageState extends State<MainPageView> {
     );
 
     if (response.statusCode == 200) {
-      print('Image uploaded successfully');
+      //Menü geliyo gösteriliyo.
+      Map<String, dynamic> menuData = jsonDecode(response.body);
+      Navigator.push(
+        _scaffoldKey.currentContext!,
+        MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
+      );
     } else {
       // pop-up eklenebilir
       print('Failed to upload image. Status code: ${response.statusCode}');
@@ -118,23 +123,6 @@ class MainPageState extends State<MainPageView> {
     print('Failed to upload image: $e');
   }
 }
-
-  //Endpoint'te menü var, assets klasöründeki burgerKing.json gibi varsaydım bütün ko
-  //kodlar ona göre yazılı.
-   Future<void> getMenu() async {
-    Uri uri = Uri.parse('http://192.168.1.41:8000/azure/detect-brand');
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> menuData = jsonDecode(response.body);
-      Navigator.push(
-        _scaffoldKey.currentContext!,
-        MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
-      );
-    } else {
-      throw Exception('Failed to load JSON from the endpoint');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,9 +169,7 @@ class MainPageState extends State<MainPageView> {
                       String base64Image = base64Encode(imageBytes);
 
                       await sendImage(base64Image);
-                      //alttaki iki satır eklendi
-                      if (!mounted) return;
-                      await getMenu();
+                    
                       // Vibrate for a short time
                       HapticFeedback.lightImpact();
 
@@ -199,7 +185,7 @@ class MainPageState extends State<MainPageView> {
                       Overlay.of(context)!.insert(overlayEntry);
 
                       // Remove the overlay entry after 1 second
-                      Fuif(mounted) {
+                      if(mounted) {
                         Overlay.of(context)!.insert(overlayEntry);
                         Future.delayed(
                             Duration(seconds: 1), () => overlayEntry.remove());

@@ -212,7 +212,7 @@ class _SignUpViewState extends State<SignUpView> {
     _passwordController.dispose();
   }
 
-  void handleRegister() {
+  /*void handleRegister() {
     // Simulate registration success
     Future.delayed(Duration(seconds: 1), () {
       // Clear the form fields
@@ -232,41 +232,41 @@ class _SignUpViewState extends State<SignUpView> {
       });
     });
   }
-
+*/
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //BURASINI SİLMEDİM BACKENDDEN GERÇEK VERİ GELİNCE BURASI KULLANILIR BELKİ DİYE EMİN DEĞİLİM!
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  // Future<void> handleRegister() async {
-  //   email = _emailController.text;
-  //   username = _usernameController.text;
-  //   password = _passwordController.text;
+   Future<void> handleRegister() async {
+     email = _emailController.text;
+     username = _usernameController.text;
+     password = _passwordController.text;
 
-  //   Uri uri = Uri.parse('http://192.168.1.37:8000/users/register');
-  //   try {
-  //     final response = await http.post(
-  //       uri,
-  //       headers: <String, String>{
-  //         'Content-Type': 'application/json; charset=UTF-8',
-  //       },
-  //       body: jsonEncode(<String, String>{
-  //         'username': username,
-  //         'password': password,
-  //       }),
-  //     );
+     Uri uri = Uri.parse('http://192.168.170.234:8000/users/register');
+     try {
+       final response = await http.post(
+         uri,
+         headers: <String, String>{
+           'Content-Type': 'application/json; charset=UTF-8',
+         },
+         body: jsonEncode(<String, String>{
+           'username': username,
+           'password': password,
+         }),
+       );
 
-  //     if (response.statusCode == 200) {
-  //       showSuccessDialog();
-  //       _emailController.clear();
-  //       _usernameController.clear();
-  //       _passwordController.clear();
-  //     } else {
-  //       print('Response status code: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print("Exception occurred: $e");
-  //   }
-  // }
+       if (response.statusCode == 200) {
+         showSuccessDialog();
+         _emailController.clear();
+         _usernameController.clear();
+         _passwordController.clear();
+       } else {
+         print('Response status code: ${response.statusCode}');
+       }
+     } catch (e) {
+       print("Exception occurred: $e");
+     }
+   }
 
   void showSuccessDialog() {
     showDialog(
