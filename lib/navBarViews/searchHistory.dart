@@ -16,12 +16,13 @@ class _SearchHistoryState extends State<searchHistory> {
     favorited = [];
   }
 
-  void _toggleFavorite(int index) {
+  void _toggleFavorite(int index, String brandName) {
     setState(() {
       favorited[index] = !favorited[index];
     });
-    handleFavorite(index);
+    handleFavorite(index, brandName);
   }
+
   //favorileri alma
   Future<List<dynamic>> getFavorite() async {
     //url değişir
@@ -34,22 +35,30 @@ class _SearchHistoryState extends State<searchHistory> {
       throw Exception('Failed to fetch data from the server');
     }
   }
-  //kalpe basma
-  Future<void> handleFavorite(int index) async {
-    //url değişir
-    var url = Uri.parse('https://192.168.1.129/scanhistory');
 
-    var response = await http.post(url, body: {
-      'favorite': favorited[index].toString(),
-      'index': index.toString(),
-    });
-    print(response.toString());
-    if (response.statusCode == 200) {
-      //Favorileriniz kaydedildi pop-up'ı
-      print('Successfully sent data to backend endpoint.');
+  //kalbe basma işlemleri
+  Future<void> handleFavorite(int index, String brandName) async {
+    var url;
+    if (favorited[index]) {
+      url = Uri.parse('https://192.168.1.129/favorites/$brandName');
+      //kalbe basıp favorileme POST
+      var response = await http.post(url);
+      if (response.statusCode == 200) {
+        print('Brand added to favorites');
+      } else {
+        print(
+            'Failed to add brand to favorites. Status code: ${response.statusCode}');
+      }
     } else {
-      //Favorileriniz kaydedilemedi pop up-ı
-      print('Failed to send data to backend endpoint.');
+      //kalbe basıp favoriden kaldırma DELETE
+      url = Uri.parse('https://192.168.1.129/favorites/$brandName');
+      var response = await http.delete(url);
+      if (response.statusCode == 200) {
+        print('Brand removed from favorites');
+      } else {
+        print(
+            'Failed to remove brand from favorites. Status code: ${response.statusCode}');
+      }
     }
   }
 
@@ -73,18 +82,18 @@ class _SearchHistoryState extends State<searchHistory> {
                   itemCount: mydata == null ? 0 : mydata.length,
                   itemBuilder: (BuildContext context, int index) {
                     return ListTile(
-                      title: Text("Brand Name: " + mydata[index]["brand_name"]),
-                      subtitle:
-                          Text("Scan Time: " + mydata[index]["scan_time"]),
-                      trailing: IconButton(
-                        icon: favorited[index]
-                            ? Icon(Icons.favorite)
-                            : Icon(Icons.favorite_border),
-                        onPressed: () {
-                          _toggleFavorite(index);
-                        },
-                      ),
-                    );
+                        title:
+                            Text("Brand Name: " + mydata[index]["brand_name"]),
+                        subtitle:
+                            Text("Scan Time: " + mydata[index]["scan_time"]),
+                        trailing: IconButton(
+                          icon: favorited[index]
+                              ? Icon(Icons.favorite)
+                              : Icon(Icons.favorite_border),
+                          onPressed: () {
+                            _toggleFavorite(index, mydata[index]["brand_name"]);
+                          },
+                        ));
                   },
                 );
               }
