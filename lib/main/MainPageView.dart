@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_qrless/navbar/navBar.dart';
 import 'package:vibration/vibration.dart';
 import 'package:flutter_qrless/main/MenuPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 // Main page's entry point
 Future<void> main() async {
@@ -44,6 +44,8 @@ class MainPageState extends State<MainPageView> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _processing = false;
+  bool _showWarning = false;
 
   @override
   void initState() {
@@ -83,53 +85,88 @@ class MainPageState extends State<MainPageView> {
         false;
   }
 
-  // Fotoyu backend'e göndermeç.
-  Future<void> sendImage(String base64Image) async {
-  // Retrieve token from shared preferences
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('token');
+  void showWarningDialog() {
+    // Vibrate the device for 1 second
+    Vibration.vibrate(duration: 1000);
 
-  if (token == null) {
-    print('Token is null, please authenticate again');
-    return;
-  }
-
-  // Your URL may change
-  Uri uri = Uri.parse('http://192.168.170.234:8000/azure/detect-brand');
-  
-  try {
-    http.Response response = await http.post(
-      uri,
-      body: jsonEncode(<String, String>{'image': base64Image}),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Logo not defined or bad scan process!',
+            style: TextStyle(color: Colors.red),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
       },
     );
-
-    if (response.statusCode == 200) {
-      //Menü geliyo gösteriliyo.
-      Map<String, dynamic> menuData = jsonDecode(response.body);
-      Navigator.push(
-        _scaffoldKey.currentContext!,
-        MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
-      );
-    } else {
-      // pop-up eklenebilir
-      print('Failed to upload image. Status code: ${response.statusCode}');
-    }
-  } catch (e) {
-    // opo-up eklenebilir
-    print('Failed to upload image: $e');
   }
-}
+
+  // Fotoyu backend'e göndermeç.
+  Future<void> sendImage(String base64Image) async {
+    setState(() {
+      _processing = true;
+    });
+
+    // Retrieve token from shared preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      print('Token is null, please authenticate again');
+      return;
+    }
+
+    // Your URL maychange
+    Uri uri = Uri.parse('http://192.168.170.234:8000/azure/detect-brand');
+
+    try {
+      http.Response response = await http.post(
+        uri,
+        body: jsonEncode(<String, String>{'image_base64': base64Image}),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Menü geliyo gösteriliyo.
+        print("**");
+        print(response.body);
+        Map<String, dynamic> menuData = jsonDecode(response.body);
+        Navigator.push(
+          _scaffoldKey.currentContext!,
+          MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
+        );
+      } else {
+        showWarningDialog();
+        print('Failed to upload image. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      showWarningDialog();
+      print('Failed to upload image: $e');
+    } finally {
+      setState(() {
+        _processing = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        key:_scaffoldKey,
+        key: _scaffoldKey,
         appBar: AppBar(
           title: const Center(
             child: Text('QRless'),
@@ -148,89 +185,73 @@ class MainPageState extends State<MainPageView> {
                 }
               },
             ),
+            if (_processing || _showWarning)
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: Center(
+                      child: _processing
+                          ? CircularProgressIndicator()
+                          : AlertDialog(
+                              title: Text(
+                                'Logo not defined or bad scan process!',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showWarning = false;
+                                    });
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
               bottom: 5.0,
               left: 0.0,
               right: 0.0,
               child: Center(
                 child: FloatingActionButton(
-                  onPressed: () async {
-                    try {
-                      await _initializeControllerFuture;
+                  onPressed: _processing
+                      ? null
+                      : () async {
+                          try {
+                            await _initializeControllerFuture;
 
-                      final image = await _controller.takePicture();
+                            final image = await _controller.takePicture();
 
-                      if (!mounted) return;
+                            if (!mounted) return;
 
-                      Uint8List imageBytes =
-                          await File(image.path).readAsBytes();
+                            Uint8List imageBytes =
+                                await File(image.path).readAsBytes();
 
-                      // Base64 encoded image
-                      String base64Image = base64Encode(imageBytes);
+                            // Base64 encoded image
+                            String base64Image = base64Encode(imageBytes);
 
-                      await sendImage(base64Image);
-                    
-                      // Vibrate for a short time
-                      HapticFeedback.lightImpact();
+                            setState(() {
+                              _processing = true;
+                            });
 
-                      // Create an overlay entry
-                      OverlayEntry overlayEntry = OverlayEntry(
-                        builder: (context) => Container(
-                          color: const Color.fromARGB(255, 186, 179, 179)
-                              .withOpacity(0.4),
-                        ),
-                      );
+                            await sendImage(base64Image);
 
-                      // Insert the overlay entry to the current context
-                      Overlay.of(context)!.insert(overlayEntry);
+                            // Vibrate for a short time
+                            HapticFeedback.lightImpact();
 
-                      // Remove the overlay entry after 1 second
-                      if(mounted) {
-                        Overlay.of(context)!.insert(overlayEntry);
-                        Future.delayed(
-                            Duration(seconds: 1), () => overlayEntry.remove());
-                      }
-                    } catch (e) {
-                      print(e);
-                    }
-                  },
-
-//BURASI HEM TİTREŞİMLİ HEM DE EKRAN BLURLU KOD/////////////////////////////////////////////////////////////////////////////////////
-//                   onPressed: () async {
-//   try {
-//     await _initializeControllerFuture;
-
-//     final image = await _controller.takePicture();
-
-//     if (!mounted) return;
-
-//     Uint8List imageBytes = await File(image.path).readAsBytes();
-
-//     // Base64 encoded image
-//     String base64Image = base64Encode(imageBytes);
-
-//     sendImage(base64Image);
-
-//     // Vibrate the device for 1 second
-//     Vibration.vibrate(duration: 1000);
-
-//     // Create an overlay entry
-//     OverlayEntry overlayEntry = OverlayEntry(
-//       builder: (context) => Container(
-//         color: Colors.white.withOpacity(0.3),
-//       ),
-//     );
-
-//     // Insert the overlay entry to the current context
-//     Overlay.of(context)!.insert(overlayEntry);
-
-//     // Remove the overlay entry after 1 second
-//     Future.delayed(Duration(seconds: 1), () => overlayEntry.remove());
-//   } catch (e) {
-//     print(e);
-//   }
-// },
-
+                            setState(() {
+                              _processing = false;
+                            });
+                          } catch (e) {
+                            print(e);
+                          }
+                        },
                   child: const Icon(Icons.camera_alt),
                 ),
               ),

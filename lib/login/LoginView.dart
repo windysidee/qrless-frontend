@@ -129,9 +129,9 @@ class _LoginViewState extends State<LoginView> {
                 ElevatedButton(
                   onPressed: () {
                     _username = _usernameController.text;
-                    _password = _passwordController.text;                   
-                    Navigator.pushNamed(context, '/MainPage');
-                    //handleLogin();
+                    _password = _passwordController.text;
+                    //Navigator.pushNamed(context, '/MainPage');
+                    handleLogin();
                   },
                   child: Text(
                     'Submit',
@@ -210,17 +210,26 @@ class _LoginViewState extends State<LoginView> {
   Future<void> handleLogin() async {
     Uri uri = Uri.parse('http://192.168.170.234:8000/users/login');
     try {
-      final response = await http.post(uri,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            'username': '$_username',
-            'password': '$_password',
-          }));
+      final response = await http.post(
+        uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': '$_username',
+          'password': '$_password',
+        }),
+      );
 
       if (response.statusCode == 200) {
-        
+        // Login successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login successful'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         String? token = jsonResponse['access_token'];
         if (token != null) {
@@ -232,10 +241,16 @@ class _LoginViewState extends State<LoginView> {
 
         Navigator.pushNamed(context, '/MainPage');
       } else {
-        print('Response status code: ${response.statusCode}');
+        // Failed login
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed login! Username or password is incorrect.'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    } catch (e) {
-      print("Exception occurred: $e");
+    } catch (error) {
+      print('Error: $error');
     }
   }
 }
