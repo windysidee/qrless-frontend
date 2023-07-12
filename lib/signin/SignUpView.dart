@@ -212,37 +212,13 @@ class _SignUpViewState extends State<SignUpView> {
     _passwordController.dispose();
   }
 
-  /*void handleRegister() {
-    // Simulate registration success
-    Future.delayed(Duration(seconds: 1), () {
-      // Clear the form fields
-      _emailController.clear();
-      _usernameController.clear();
-      _passwordController.clear();
-
-      // Show success dialog
-      showSuccessDialog();
-
-      // Navigate back to LoginView after a delay
-      Future.delayed(Duration(seconds: 2), () {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
-          (Route<dynamic> route) => false,
-        );
-      });
-    });
-  }
-*/
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //BURASINI SİLMEDİM BACKENDDEN GERÇEK VERİ GELİNCE BURASI KULLANILIR BELKİ DİYE EMİN DEĞİLİM!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
    Future<void> handleRegister() async {
      email = _emailController.text;
      username = _usernameController.text;
      password = _passwordController.text;
-
-     Uri uri = Uri.parse('http://192.168.170.234:8000/users/register');
+    //dumb url
+     Uri uri = Uri.parse('http://0.0.0.0:8000/users/register');
      try {
        final response = await http.post(
          uri,

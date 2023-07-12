@@ -6,7 +6,6 @@ import 'package:flutter_qrless/main/MainPageView.dart';
 import 'package:flutter_qrless/main/MenuPage.dart';
 
 void main() async {
-  //kamera işleri normalde main'deydi fakat gpt buraya aldırdı inan bilmiyorum.
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
   final firstCamera = cameras.first;
@@ -27,8 +26,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       routes: {
-        //Menu görüntüleyeceksiniz alttakini yorumdan çıkarmaç
-        //'/': (context) => MenuPage(),
         '/': (context) => LoginView(),
         '/SignIn': (context) => SignUpView(),
         '/MainPage': (context) => MainPageView(camera: firstCamera),

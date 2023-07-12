@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +43,6 @@ class MainPageState extends State<MainPageView> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _processing = false;
-  bool _showWarning = false;
 
   @override
   void initState() {
@@ -85,6 +82,76 @@ class MainPageState extends State<MainPageView> {
         false;
   }
 
+  // Fotoyu backend'e göndermeç.
+  Future<void> sendImage(String base64Image) async {
+    // Show the loading dialog
+    showLoadingDialog();
+
+    // Retrieve token from shared preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      print('Token is null, please authenticate again');
+      // Hide the loading dialog
+      Navigator.of(context).pop();
+      return;
+    }
+
+    // Your URL may change
+    //dumb url
+    Uri uri = Uri.parse('http://0.0.0.0:8000/azure/detect-brand');
+
+    try {
+      http.Response response = await http.post(
+        uri,
+        body: jsonEncode(<String, String>{'image': base64Image}),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      // Hide the loading dialog
+      Navigator.of(context).pop();
+
+      if (response.statusCode == 200) {
+        //Menü geliyo gösteriliyo.
+        Map<String, dynamic> menuData = jsonDecode(response.body);
+        Navigator.push(
+          _scaffoldKey.currentContext!,
+          MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
+        );
+      } else {
+        // Show the warning dialog
+        showWarningDialog();
+        print('Failed to upload image. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Show the warning dialog
+      showWarningDialog();
+      print('Failed to upload image: $e');
+    }
+  }
+
+  void showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16.0),
+              Text("Loading..."),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void showWarningDialog() {
     // Vibrate the device for 1 second
     Vibration.vibrate(duration: 1000);
@@ -108,57 +175,6 @@ class MainPageState extends State<MainPageView> {
         );
       },
     );
-  }
-
-  // Fotoyu backend'e göndermeç.
-  Future<void> sendImage(String base64Image) async {
-    setState(() {
-      _processing = true;
-    });
-
-    // Retrieve token from shared preferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    if (token == null) {
-      print('Token is null, please authenticate again');
-      return;
-    }
-
-    // Your URL maychange
-    Uri uri = Uri.parse('http://192.168.170.234:8000/azure/detect-brand');
-
-    try {
-      http.Response response = await http.post(
-        uri,
-        body: jsonEncode(<String, String>{'image_base64': base64Image}),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        // Menü geliyo gösteriliyo.
-        print("**");
-        print(response.body);
-        Map<String, dynamic> menuData = jsonDecode(response.body);
-        Navigator.push(
-          _scaffoldKey.currentContext!,
-          MaterialPageRoute(builder: (context) => MenuPage(menu: menuData)),
-        );
-      } else {
-        showWarningDialog();
-        print('Failed to upload image. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      showWarningDialog();
-      print('Failed to upload image: $e');
-    } finally {
-      setState(() {
-        _processing = false;
-      });
-    }
   }
 
   @override
@@ -185,73 +201,52 @@ class MainPageState extends State<MainPageView> {
                 }
               },
             ),
-            if (_processing || _showWarning)
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    color: Colors.black.withOpacity(0.3),
-                    child: Center(
-                      child: _processing
-                          ? CircularProgressIndicator()
-                          : AlertDialog(
-                              title: Text(
-                                'Logo not defined or bad scan process!',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _showWarning = false;
-                                    });
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ),
-                ),
-              ),
             Positioned(
               bottom: 5.0,
               left: 0.0,
               right: 0.0,
               child: Center(
                 child: FloatingActionButton(
-                  onPressed: _processing
-                      ? null
-                      : () async {
-                          try {
-                            await _initializeControllerFuture;
+                  onPressed: () async {
+                    try {
+                      await _initializeControllerFuture;
 
-                            final image = await _controller.takePicture();
+                      final image = await _controller.takePicture();
 
-                            if (!mounted) return;
+                      if (!mounted) return;
 
-                            Uint8List imageBytes =
-                                await File(image.path).readAsBytes();
+                      Uint8List imageBytes =
+                          await File(image.path).readAsBytes();
 
-                            // Base64 encoded image
-                            String base64Image = base64Encode(imageBytes);
+                      // Base64 encoded image
+                      String base64Image = base64Encode(imageBytes);
 
-                            setState(() {
-                              _processing = true;
-                            });
+                      await sendImage(base64Image);
 
-                            await sendImage(base64Image);
+                      // Vibrate for a short time
+                      HapticFeedback.lightImpact();
 
-                            // Vibrate for a short time
-                            HapticFeedback.lightImpact();
+                      // Create an overlay entry
+                      OverlayEntry? overlayEntry = OverlayEntry(
+                        builder: (context) => Container(
+                          color: const Color.fromARGB(255, 186, 179, 179)
+                              .withOpacity(0.4),
+                        ),
+                      );
 
-                            setState(() {
-                              _processing = false;
-                            });
-                          } catch (e) {
-                            print(e);
-                          }
-                        },
+                      Overlay.of(context)!.insert(overlayEntry);
+
+                      if (mounted) {
+                        Overlay.of(context)!.insert(overlayEntry);
+                        Future.delayed(Duration(seconds: 1), () {
+                          overlayEntry?.remove();
+                          overlayEntry = null;
+                        });
+                      }
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
                   child: const Icon(Icons.camera_alt),
                 ),
               ),

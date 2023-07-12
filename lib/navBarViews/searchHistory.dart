@@ -25,7 +25,7 @@ class _SearchHistoryState extends State<searchHistory> {
     handleFavorite(index, brandName);
   }
 
-  //favorileri alma
+  //Favorileri alma
   Future<List<dynamic>> scanHistory() async {
     //url değişir
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -34,8 +34,8 @@ class _SearchHistoryState extends State<searchHistory> {
     if (token == null) {
       print('Token is null, please authenticate again');
     }
-
-    var url = Uri.parse('http://192.168.170.234:8000/users/scanhistory');
+    //dumb url
+    var url = Uri.parse('http://0.0.0.0:8000/users/scanhistory');
     var response = await http.get(
       url,
       headers: {
@@ -58,8 +58,8 @@ class _SearchHistoryState extends State<searchHistory> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     if (favorited[index]) {
-      url = Uri.parse('http://192.168.170.234:8000/users/favorites/$brandName');
-      //kalbe basıp favorileme POST
+      url = Uri.parse('http://0.0.0.0:8000/users/favorites/$brandName');
+      //Favorilere ekleme -> HTTP POST
       var response = await http.post(
         url,
         headers: {
@@ -73,8 +73,8 @@ class _SearchHistoryState extends State<searchHistory> {
             'Failed to add brand to favorites. Status code: ${response.statusCode}');
       }
     } else {
-      //kalbe basıp favoriden kaldırma DELETE
-      url = Uri.parse('http://192.168.170.234:8000/users/favorites/$brandName');
+      //Favorilerden kaldırma işlemleri -> HTTP DELETE
+      url = Uri.parse('http://0.0.0.0:8000/users/favorites/$brandName');
       var response = await http.delete(
         url,
         headers: {
