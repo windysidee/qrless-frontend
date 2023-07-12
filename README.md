@@ -1,1 +1,1 @@
---Zengin olcaz--
+Frontend of the logo detection mobile application.
